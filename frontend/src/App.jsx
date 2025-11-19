@@ -7,7 +7,7 @@ import { DashboardPage } from './pages/dashboard-page'
 import { IFSCLookupPage } from './pages/ifsc-lookup-page'
 import { SchemesPage } from './pages/schemes-page'
 import { MutualFundPage } from './pages/mutual-fund-page'
-import { MarketDataPage } from './pages/market-data-page'
+import { PortfolioTrackerPage } from './pages/portfolio-tracker-page'
 import { CalculatorsPage } from './pages/calculators-page'
 import { FraudDetectionPage } from './pages/fraud-detection-page'
 import { RecommendationsPage } from './pages/recommendations-page'
@@ -43,9 +43,9 @@ function AppRoutes() {
             <MutualFundPage />
           </PageTransition>
         } />
-        <Route path="/market" element={
+        <Route path="/portfolio" element={
           <PageTransition>
-            <MarketDataPage />
+            <PortfolioTrackerPage />
           </PageTransition>
         } />
         <Route path="/fraud-detection" element={

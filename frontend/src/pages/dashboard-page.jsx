@@ -111,8 +111,8 @@ const fallbackMarketData = {
       gbpInr: 92.50
     },
     indices: {
-      sensex: { value: 65900, change: 234.56, changePercent: 0.36 },
-      nifty: { value: 19680, change: 78.90, changePercent: 0.41 }
+      sensex: { value: 65800, change: 234.56, changePercent: 0.36 },
+      nifty: { value: 19650, change: 78.90, changePercent: 0.41 }
     }
   }
 }
@@ -130,33 +130,35 @@ export function DashboardPage() {
         const response = await marketAPI.summary()
         if (!isMountedRef.current) return
         
-        if (response && response.data && response.data.success) {
+        if (response && response.data && response.data.success && response.data.data) {
           // API returns: { success: true, data: { indices: {...}, crypto: {...}, ... } }
           const apiData = response.data.data
           if (isMountedRef.current) {
+            // Ensure indices data exists
+            if (!apiData.indices) {
+              apiData.indices = fallbackMarketData.data.indices
+            }
+            
             setMarketData(apiData)
             
-            // Generate chart data from real Nifty value
-            if (apiData && apiData.indices && apiData.indices.nifty && apiData.indices.nifty.value) {
-              const chartData = generateIntradayChartData(apiData.indices.nifty.value)
-              setStockChartData(chartData)
-            } else {
-              setStockChartData(generateIntradayChartData(19500))
-            }
+            // Generate chart data from Nifty value
+            const niftyValue = apiData.indices?.nifty?.value || 19650
+            const chartData = generateIntradayChartData(niftyValue)
+            setStockChartData(chartData)
           }
         } else {
           // Use fallback structure
           if (isMountedRef.current) {
             setMarketData(fallbackMarketData.data)
-            setStockChartData(generateIntradayChartData(19500))
+            setStockChartData(generateIntradayChartData(19650))
           }
         }
       } catch (error) {
         console.error('Failed to fetch market data:', error)
-        // Use fallback data if API fails - use .data to match structure
+        // Use fallback data if API fails - never crash
         if (isMountedRef.current) {
           setMarketData(fallbackMarketData.data)
-          setStockChartData(generateIntradayChartData(19500))
+          setStockChartData(generateIntradayChartData(19650))
         }
       } finally {
         if (isMountedRef.current) {
@@ -167,8 +169,13 @@ export function DashboardPage() {
 
     fetchMarketData()
     
-    // Refresh market data every 30 seconds
-    const interval = setInterval(fetchMarketData, 30000)
+    // Refresh market data every 30 seconds for live updates
+    const interval = setInterval(() => {
+      if (isMountedRef.current) {
+        fetchMarketData()
+      }
+    }, 30000)
+    
     return () => {
       isMountedRef.current = false
       clearInterval(interval)
@@ -225,7 +232,7 @@ export function DashboardPage() {
                 <p className="text-3xl font-bold">
                   {displayData?.indices?.sensex?.value ? 
                     displayData.indices.sensex.value.toLocaleString('en-IN', { maximumFractionDigits: 2 }) 
-                    : '65,900.45'}
+                    : '65,800.00'}
                 </p>
                 <p className={`text-sm flex items-center gap-1 mt-1 ${
                   (displayData?.indices?.sensex?.changePercent || 0) >= 0 ? 'text-green-600' : 'text-red-600'
@@ -236,16 +243,13 @@ export function DashboardPage() {
                   ({(displayData?.indices?.sensex?.changePercent || 0) >= 0 ? '+' : ''}
                   {(displayData?.indices?.sensex?.changePercent || 0).toFixed(2)}%)
                 </p>
-                {displayData?.indices?.sensex?.note && (
-                  <p className="text-xs text-muted-foreground mt-1">{displayData.indices.sensex.note}</p>
-                )}
               </div>
               <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
                 <p className="text-sm text-muted-foreground mb-1">NSE Nifty 50</p>
                 <p className="text-3xl font-bold">
                   {displayData?.indices?.nifty?.value ? 
                     displayData.indices.nifty.value.toLocaleString('en-IN', { maximumFractionDigits: 2 }) 
-                    : '19,680.12'}
+                    : '19,650.00'}
                 </p>
                 <p className={`text-sm flex items-center gap-1 mt-1 ${
                   (displayData?.indices?.nifty?.changePercent || 0) >= 0 ? 'text-green-600' : 'text-red-600'
@@ -256,9 +260,6 @@ export function DashboardPage() {
                   ({(displayData?.indices?.nifty?.changePercent || 0) >= 0 ? '+' : ''}
                   {(displayData?.indices?.nifty?.changePercent || 0).toFixed(2)}%)
                 </p>
-                {displayData?.indices?.nifty?.note && (
-                  <p className="text-xs text-muted-foreground mt-1">{displayData.indices.nifty.note}</p>
-                )}
               </div>
             </div>
           </CardContent>

@@ -9,7 +9,7 @@ const Dialog = ({ open, onOpenChange, children, ...props }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div 
         className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
-        onClick={() => onOpenChange(false)}
+        onClick={() => onOpenChange && onOpenChange(false)}
       />
       <div className="relative z-50 w-full max-w-lg mx-4 animate-scale-in">
         {children}

@@ -8,7 +8,8 @@ import {
   Shield, 
   Lightbulb,
   Menu,
-  X
+  X,
+  PieChart
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '../../lib/utils'
@@ -19,7 +20,7 @@ const menuItems = [
   { path: '/bank-lookup', label: 'Bank Lookup', icon: Building2 },
   { path: '/schemes', label: 'Government Schemes', icon: FileText },
   { path: '/mutual-funds', label: 'Mutual Funds', icon: TrendingUp },
-  { path: '/market', label: 'Market Data', icon: TrendingUp },
+  { path: '/portfolio', label: 'Portfolio Tracker', icon: PieChart },
   { path: '/fraud-detection', label: 'Fraud Detection', icon: Shield },
   { path: '/recommendations', label: 'Recommendations', icon: Lightbulb },
 ]
