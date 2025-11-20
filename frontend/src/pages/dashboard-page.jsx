@@ -1,584 +1,452 @@
-import { useEffect, useState, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { TrendingUp, TrendingDown, Wallet, DollarSign, Shield, BarChart3, Newspaper, ArrowUpRight, ArrowDownRight, RefreshCw } from 'lucide-react'
-import { marketAPI } from '../api'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
+import { Button } from '../components/ui/button'
+import { 
+  Calculator, 
+  Building2, 
+  FileText, 
+  TrendingUp, 
+  Shield, 
+  Lightbulb,
+  PieChart,
+  ArrowRight,
+  CheckCircle2,
+  Newspaper,
+  Sparkles,
+  Zap,
+  Target,
+  Users
+} from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 
-const stats = [
-  { name: 'Total Portfolio', value: '₹12,45,678', change: '+12.5%', trend: 'up', icon: Wallet },
-  { name: 'Monthly Savings', value: '₹45,000', change: '+8.2%', trend: 'up', icon: DollarSign },
-  { name: 'Tax Savings', value: '₹1,50,000', change: 'Maxed', trend: 'neutral', icon: DollarSign },
-  { name: 'Protection Score', value: '85/100', change: '+5', trend: 'up', icon: Shield },
+const features = [
+  {
+    icon: Calculator,
+    title: 'Financial Calculators',
+    description: 'Calculate PF, Income Tax, EMI, and SIP with precision. Compare old vs new tax regimes.',
+    color: 'from-blue-500/20 to-blue-600/10',
+    borderColor: 'border-blue-500/20',
+    link: '/calculators'
+  },
+  {
+    icon: Building2,
+    title: 'Bank Lookup',
+    description: 'Instantly find bank branch details using IFSC or MICR codes. Access comprehensive banking information.',
+    color: 'from-green-500/20 to-green-600/10',
+    borderColor: 'border-green-500/20',
+    link: '/bank-lookup'
+  },
+  {
+    icon: FileText,
+    title: 'Government Schemes',
+    description: 'Check eligibility for PMAY, PMJJBY, PMSBY, APY, and scholarship schemes. Get personalized recommendations.',
+    color: 'from-purple-500/20 to-purple-600/10',
+    borderColor: 'border-purple-500/20',
+    link: '/schemes'
+  },
+  {
+    icon: TrendingUp,
+    title: 'Mutual Funds',
+    description: 'Track NAV, analyze fund performance, and explore SEBI-registered mutual fund schemes.',
+    color: 'from-orange-500/20 to-orange-600/10',
+    borderColor: 'border-orange-500/20',
+    link: '/mutual-funds'
+  },
+  {
+    icon: PieChart,
+    title: 'Portfolio Tracker',
+    description: 'Monitor your investments across stocks, mutual funds, FDs, and more. Track returns in real-time.',
+    color: 'from-pink-500/20 to-pink-600/10',
+    borderColor: 'border-pink-500/20',
+    link: '/portfolio'
+  },
+  {
+    icon: Shield,
+    title: 'Fraud Detection',
+    description: 'Advanced AI-powered fraud detection system. Analyze transactions for suspicious patterns.',
+    color: 'from-red-500/20 to-red-600/10',
+    borderColor: 'border-red-500/20',
+    link: '/fraud-detection'
+  },
+  {
+    icon: Lightbulb,
+    title: 'Smart Recommendations',
+    description: 'Get personalized investment recommendations based on your age, risk profile, and financial goals.',
+    color: 'from-yellow-500/20 to-yellow-600/10',
+    borderColor: 'border-yellow-500/20',
+    link: '/recommendations'
+  },
+  {
+    icon: Target,
+    title: 'Goal Planning',
+    description: 'Plan and achieve your financial goals with data-driven insights and structured recommendations.',
+    color: 'from-cyan-500/20 to-cyan-600/10',
+    borderColor: 'border-cyan-500/20',
+    link: '/recommendations'
+  }
 ]
 
-// Mock stock trends data
-const stockTrends = [
-  { symbol: 'RELIANCE', name: 'Reliance Industries', price: 2456.78, change: 2.37, changePercent: 2.37 },
-  { symbol: 'TCS', name: 'Tata Consultancy', price: 3456.12, change: 1.34, changePercent: 1.34 },
-  { symbol: 'INFY', name: 'Infosys', price: 1567.89, change: -1.23, changePercent: -1.23 },
-  { symbol: 'HDFCBANK', name: 'HDFC Bank', price: 1654.32, change: 0.89, changePercent: 0.89 },
-  { symbol: 'ICICIBANK', name: 'ICICI Bank', price: 987.65, change: -0.45, changePercent: -0.45 },
-]
-
-// Mock news cards
 const newsItems = [
   {
     id: 1,
-    title: 'Indian Stock Markets Hit All-Time High',
-    description: 'Sensex crosses 66,000 mark as investor confidence grows',
-    category: 'Markets',
-    time: '2 hours ago',
-    trend: 'up'
+    title: 'New Income Tax Regime Changes Effective from FY 2025',
+    description: 'Understanding the latest tax regime updates and how they impact your savings. Compare old vs new regime benefits.',
+    category: 'Tax',
+    date: '2 hours ago',
+    image: '📊'
   },
   {
     id: 2,
-    title: 'RBI Keeps Repo Rate Unchanged at 6.5%',
-    description: 'Central bank maintains status quo for fourth consecutive meeting',
+    title: 'RBI Introduces New Rules for Fixed Deposits',
+    description: 'Learn about the latest FD interest rates and how to maximize your returns with our FD calculator.',
     category: 'Banking',
-    time: '5 hours ago',
-    trend: 'neutral'
+    date: '5 hours ago',
+    image: '🏦'
   },
   {
     id: 3,
-    title: 'Crypto Market Surges as Bitcoin Hits New Highs',
-    description: 'Bitcoin crosses $42,000 amid institutional adoption',
-    category: 'Crypto',
-    time: '1 day ago',
-    trend: 'up'
-  },
-]
-
-// Mock crypto mini charts data
-const cryptoMiniCharts = [
-  {
-    id: 'bitcoin',
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    price: 3425678.50,
-    change: 2.45,
-    data: [3400000, 3410000, 3420000, 3415000, 3425678]
+    title: 'Top 5 Mutual Funds to Consider in 2025',
+    description: 'Expert recommendations on the best mutual fund schemes based on risk profile and investment goals.',
+    category: 'Investments',
+    date: '1 day ago',
+    image: '📈'
   },
   {
-    id: 'ethereum',
-    symbol: 'ETH',
-    name: 'Ethereum',
-    price: 245678.90,
-    change: -0.50,
-    data: [246000, 245500, 245000, 245800, 245678]
+    id: 4,
+    title: 'Government Launches New Scholarship Schemes',
+    description: 'Check your eligibility for the latest government scholarship programs using our eligibility checker.',
+    category: 'Schemes',
+    date: '2 days ago',
+    image: '🎓'
   },
   {
-    id: 'cardano',
-    symbol: 'ADA',
-    name: 'Cardano',
-    price: 45.67,
-    change: 1.23,
-    data: [44.5, 45.0, 45.2, 45.5, 45.67]
+    id: 5,
+    title: 'How to Protect Yourself from Financial Fraud',
+    description: 'Essential tips and tools to identify and prevent financial fraud. Use our fraud detection system.',
+    category: 'Security',
+    date: '3 days ago',
+    image: '🔒'
+  },
+  {
+    id: 6,
+    title: 'SIP vs Lump Sum: Which is Better?',
+    description: 'Compare SIP and lump sum investments to make informed decisions about your investment strategy.',
+    category: 'Investments',
+    date: '4 days ago',
+    image: '💰'
   }
 ]
 
-// Function to generate intraday chart data
-function generateIntradayChartData(currentValue) {
-  const times = ['9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
-  const baseValue = currentValue || 19500;
-  
-  return times.map((time, index) => {
-    const variation = (Math.random() - 0.5) * 200;
-    const trend = (index / times.length) * 100; // Slight upward trend
-    return {
-      time,
-      value: baseValue + variation + trend
-    };
-  });
-}
-
-// Fallback market data
-const fallbackMarketData = {
-  data: {
-    crypto: {
-      top5: cryptoMiniCharts.map(crypto => ({
-        id: crypto.id,
-        symbol: crypto.symbol,
-        name: crypto.name,
-        price: crypto.price,
-        changePercent24h: crypto.change
-      }))
-    },
-    forex: {
-      usdInr: 83.25,
-      eurInr: 90.50,
-      gbpInr: 92.50
-    },
-    indices: {
-      sensex: { value: 65800, change: 234.56, changePercent: 0.36 },
-      nifty: { value: 19650, change: 78.90, changePercent: 0.41 }
-    }
-  }
-}
+const benefits = [
+  'Real-time financial calculations',
+  'Government scheme eligibility checks',
+  'Comprehensive bank lookup',
+  'Portfolio tracking and analysis',
+  'Fraud detection and security',
+  'Personalized recommendations'
+]
 
 export function DashboardPage() {
-  const [marketData, setMarketData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [stockChartData, setStockChartData] = useState([])
-
-  const isMountedRef = useRef(true)
-  
-  useEffect(() => {
-    const fetchMarketData = async () => {
-      try {
-        const response = await marketAPI.summary()
-        if (!isMountedRef.current) return
-        
-        if (response && response.data && response.data.success && response.data.data) {
-          // API returns: { success: true, data: { indices: {...}, crypto: {...}, ... } }
-          const apiData = response.data.data
-          if (isMountedRef.current) {
-            // Ensure indices data exists
-            if (!apiData.indices) {
-              apiData.indices = fallbackMarketData.data.indices
-            }
-            
-            setMarketData(apiData)
-            
-            // Generate chart data from Nifty value
-            const niftyValue = apiData.indices?.nifty?.value || 19650
-            const chartData = generateIntradayChartData(niftyValue)
-            setStockChartData(chartData)
-          }
-        } else {
-          // Use fallback structure
-          if (isMountedRef.current) {
-            setMarketData(fallbackMarketData.data)
-            setStockChartData(generateIntradayChartData(19650))
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch market data:', error)
-        // Use fallback data if API fails - never crash
-        if (isMountedRef.current) {
-          setMarketData(fallbackMarketData.data)
-          setStockChartData(generateIntradayChartData(19650))
-        }
-      } finally {
-        if (isMountedRef.current) {
-          setLoading(false)
-        }
-      }
-    }
-
-    fetchMarketData()
-    
-    // Refresh market data every 30 seconds for live updates
-    const interval = setInterval(() => {
-      if (isMountedRef.current) {
-        fetchMarketData()
-      }
-    }, 30000)
-    
-    return () => {
-      isMountedRef.current = false
-      clearInterval(interval)
-    }
-  }, [])
-
-  // Normalize data structure - marketData is already the data object, or use fallback
-  const displayData = marketData || fallbackMarketData.data
+  const navigate = useNavigate()
 
   return (
-    <div className="space-y-6">
-      {/* Page Header with Gradient */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 p-8 border border-primary/20 shadow-lg"
-      >
+    <div className="space-y-12">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 p-12 border border-primary/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-        <div className="relative space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Dashboard
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Welcome back! Here's your financial overview for today.
-          </p>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        
+        <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+              <Badge variant="secondary" className="text-sm">Your Financial Companion</Badge>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+              Take Control of Your Financial Future
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+              Empowering you with powerful financial tools, calculators, and insights to make informed decisions. 
+              From tax planning to portfolio management, we've got you covered.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                size="lg" 
+                className="text-lg px-8"
+                onClick={() => navigate('/calculators')}
+              >
+                Get Started <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-lg px-8"
+                onClick={() => navigate('/recommendations')}
+              >
+                Explore Features <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="hidden md:block"
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-2xl transform rotate-6" />
+              <div className="relative bg-gradient-to-br from-primary/30 to-primary/10 rounded-2xl p-8 border border-primary/30 backdrop-blur-sm">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-background/50 rounded-lg p-4 border border-border/50">
+                    <TrendingUp className="h-8 w-8 text-primary mb-2" />
+                    <div className="text-2xl font-bold">12.5%</div>
+                    <div className="text-sm text-muted-foreground">Avg Returns</div>
+                  </div>
+                  <div className="bg-background/50 rounded-lg p-4 border border-border/50">
+                    <Calculator className="h-8 w-8 text-primary mb-2" />
+                    <div className="text-2xl font-bold">8+</div>
+                    <div className="text-sm text-muted-foreground">Tools</div>
+                  </div>
+                  <div className="bg-background/50 rounded-lg p-4 border border-border/50">
+                    <Users className="h-8 w-8 text-primary mb-2" />
+                    <div className="text-2xl font-bold">10K+</div>
+                    <div className="text-sm text-muted-foreground">Users</div>
+                  </div>
+                  <div className="bg-background/50 rounded-lg p-4 border border-border/50">
+                    <Shield className="h-8 w-8 text-primary mb-2" />
+                    <div className="text-2xl font-bold">100%</div>
+                    <div className="text-sm text-muted-foreground">Secure</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </section>
 
-      {/* Today's Market Summary */}
-      <motion.div
+      {/* Key Benefits */}
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
       >
         <Card glass className="border-primary/20">
           <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Today's Market Summary
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <RefreshCw className="h-3 w-3 animate-spin" />
-              Auto-refresh: 30s
-            </div>
-          </CardTitle>
-          <CardDescription>Real-time market updates and indices from NSE</CardDescription>
+            <CardTitle className="text-3xl flex items-center gap-2">
+              <Zap className="h-6 w-6 text-primary" />
+              Why Choose FinConnect?
+            </CardTitle>
+            <CardDescription className="text-base">
+              Everything you need to manage your finances in one place
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="p-4 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-                <p className="text-sm text-muted-foreground mb-1">BSE Sensex</p>
-                <p className="text-3xl font-bold">
-                  {displayData?.indices?.sensex?.value ? 
-                    displayData.indices.sensex.value.toLocaleString('en-IN', { maximumFractionDigits: 2 }) 
-                    : '65,800.00'}
-                </p>
-                <p className={`text-sm flex items-center gap-1 mt-1 ${
-                  (displayData?.indices?.sensex?.changePercent || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {(displayData?.indices?.sensex?.changePercent || 0) >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                  {(displayData?.indices?.sensex?.changePercent || 0) >= 0 ? '+' : ''}
-                  {(displayData?.indices?.sensex?.change || 0).toFixed(2)} 
-                  ({(displayData?.indices?.sensex?.changePercent || 0) >= 0 ? '+' : ''}
-                  {(displayData?.indices?.sensex?.changePercent || 0).toFixed(2)}%)
-                </p>
-              </div>
-              <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
-                <p className="text-sm text-muted-foreground mb-1">NSE Nifty 50</p>
-                <p className="text-3xl font-bold">
-                  {displayData?.indices?.nifty?.value ? 
-                    displayData.indices.nifty.value.toLocaleString('en-IN', { maximumFractionDigits: 2 }) 
-                    : '19,650.00'}
-                </p>
-                <p className={`text-sm flex items-center gap-1 mt-1 ${
-                  (displayData?.indices?.nifty?.changePercent || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {(displayData?.indices?.nifty?.changePercent || 0) >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                  {(displayData?.indices?.nifty?.changePercent || 0) >= 0 ? '+' : ''}
-                  {(displayData?.indices?.nifty?.change || 0).toFixed(2)} 
-                  ({(displayData?.indices?.nifty?.changePercent || 0) >= 0 ? '+' : ''}
-                  {(displayData?.indices?.nifty?.changePercent || 0).toFixed(2)}%)
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon
-          return (
-            <motion.div
-              key={stat.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <Card 
-                glass
-                className="hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] border-border/50 group"
-              >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.name}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-              </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <p className={`text-xs mt-1 flex items-center space-x-1 ${
-                    stat.trend === 'up' ? 'text-green-600' : stat.trend === 'down' ? 'text-red-600' : 'text-muted-foreground'
-                  }`}>
-                    {stat.trend === 'up' && <TrendingUp className="h-3 w-3" />}
-                    {stat.trend === 'down' && <TrendingDown className="h-3 w-3" />}
-                    <span>{stat.change}</span>
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {/* Stock Trends */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-      >
-        <Card glass className="hover:shadow-2xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle>Top Stock Trends</CardTitle>
-            <CardDescription>Today's top performing stocks</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {stockTrends.map((stock, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {benefits.map((benefit, index) => (
                 <motion.div
-                  key={stock.symbol}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer group"
+                  key={benefit}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
+                  className="flex items-center gap-3 p-4 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <span className="text-xs font-bold">{stock.symbol}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">{stock.name}</p>
-                      <p className="text-sm text-muted-foreground">{stock.symbol}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">₹{stock.price.toFixed(2)}</p>
-                    <p className={`text-sm flex items-center gap-1 justify-end ${
-                      stock.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {stock.changePercent >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                      {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
-                    </p>
-                  </div>
+                  <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span className="font-medium">{benefit}</span>
                 </motion.div>
               ))}
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </motion.section>
 
-      {/* Market Summary - Charts and Crypto */}
-      <motion.div 
-        className="grid gap-4 md:grid-cols-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        {/* Crypto Mini Charts */}
-        <Card glass className="hover:shadow-2xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle>Crypto Mini Charts</CardTitle>
-            <CardDescription>24h price movements</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {cryptoMiniCharts.map((crypto, index) => {
-              const chartData = crypto.data.map((val, i) => ({ time: i, value: val }))
-              return (
-                <motion.div
-                  key={crypto.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
-                  className="p-3 rounded-lg bg-muted/30 border border-border/50"
+      {/* Features Grid */}
+      <section>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="mb-8"
+        >
+          <h2 className="text-3xl font-bold mb-2">Powerful Features</h2>
+          <p className="text-muted-foreground text-lg">
+            Explore our comprehensive suite of financial tools and services
+          </p>
+        </motion.div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {features.map((feature, index) => {
+            const Icon = feature.icon
+            return (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.4 + index * 0.05 }}
+              >
+                <Card 
+                  glass 
+                  className={`hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] border ${feature.borderColor} group h-full`}
+                  onClick={() => navigate(feature.link)}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-xs font-bold">{crypto.symbol}</span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{crypto.name}</p>
-                        <p className="text-xs text-muted-foreground">₹{crypto.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
-                      </div>
+                  <CardHeader>
+                    <div className={`h-12 w-12 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                      <Icon className="h-6 w-6 text-primary" />
                     </div>
-                    <Badge variant={crypto.change >= 0 ? 'default' : 'destructive'} className="text-xs">
-                      {crypto.change >= 0 ? '+' : ''}{crypto.change.toFixed(2)}%
-                    </Badge>
-                  </div>
-                  <ResponsiveContainer width="100%" height={60}>
-                    <AreaChart data={chartData}>
-                      <defs>
-                        <linearGradient id={`cryptoGradient${index}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={crypto.change >= 0 ? '#22c55e' : '#ef4444'} stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor={crypto.change >= 0 ? '#22c55e' : '#ef4444'} stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <Area 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke={crypto.change >= 0 ? '#22c55e' : '#ef4444'}
-                        strokeWidth={1.5}
-                        fill={`url(#cryptoGradient${index})`}
-                        animationDuration={800}
-                        animationEasing="ease-out"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </motion.div>
-              )
-            })}
-          </CardContent>
-        </Card>
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {feature.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full group-hover:text-primary transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(feature.link)
+                      }}
+                    >
+                      Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })}
+        </div>
+      </section>
 
-        {/* Stock Mini Chart */}
-        <Card glass className="hover:shadow-2xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle>Nifty 50 Intraday</CardTitle>
-            <CardDescription>Today's performance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={stockChartData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" opacity={0.3} />
-                <XAxis dataKey="time" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '12px',
-                    backdropFilter: 'blur(10px)'
-                  }}
-                  animationDuration={200}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={2}
-                  fill="url(#colorValue)"
-                  animationDuration={1000}
-                  animationEasing="ease-out"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* News Cards */}
-      <motion.div
+      {/* Statistics Section */}
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+        className="grid gap-4 md:grid-cols-3"
       >
-        <Card glass className="hover:shadow-2xl transition-all duration-300">
+        <Card glass className="text-center border-primary/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Newspaper className="h-5 w-5" />
-              Financial News
-            </CardTitle>
-            <CardDescription>Latest updates from the financial world</CardDescription>
+            <Users className="h-10 w-10 text-primary mx-auto mb-2" />
+            <CardTitle className="text-4xl font-bold">10K+</CardTitle>
+            <CardDescription>Active Users</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              {newsItems.map((news, index) => (
-                <motion.div
-                  key={news.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
-                  className="p-4 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between mb-2">
+        </Card>
+        <Card glass className="text-center border-primary/20">
+          <CardHeader>
+            <Calculator className="h-10 w-10 text-primary mx-auto mb-2" />
+            <CardTitle className="text-4xl font-bold">50K+</CardTitle>
+            <CardDescription>Calculations Performed</CardDescription>
+          </CardHeader>
+        </Card>
+        <Card glass className="text-center border-primary/20">
+          <CardHeader>
+            <TrendingUp className="h-10 w-10 text-primary mx-auto mb-2" />
+            <CardTitle className="text-4xl font-bold">95%</CardTitle>
+            <CardDescription>User Satisfaction</CardDescription>
+          </CardHeader>
+        </Card>
+      </motion.section>
+
+      {/* News Section */}
+      <section>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                <Newspaper className="h-6 w-6 text-primary" />
+                Financial News & Updates
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                Stay informed with the latest financial news and insights
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {newsItems.map((news, index) => (
+            <motion.div
+              key={news.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
+            >
+              <Card 
+                glass 
+                className="hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] border-border/50 h-full group overflow-hidden"
+              >
+                <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <div className="text-6xl">{news.image}</div>
+                  <div className="absolute top-3 right-3">
                     <Badge variant="secondary" className="text-xs">
                       {news.category}
                     </Badge>
-                    {news.trend === 'up' && <ArrowUpRight className="h-4 w-4 text-green-600" />}
                   </div>
-                  <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">{news.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{news.description}</p>
-                  <p className="text-xs text-muted-foreground">{news.time}</p>
-                </motion.div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+                </div>
+                <CardHeader>
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-2">
+                    {news.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-3">
+                    {news.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">{news.date}</p>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
-      {/* Top Cryptocurrencies */}
-      {displayData && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <Card glass className="hover:shadow-2xl transition-all duration-300">
-            <CardHeader>
-              <CardTitle>Top Cryptocurrencies</CardTitle>
-              <CardDescription>24h price changes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {(displayData.data?.crypto?.top5 || cryptoMiniCharts).slice(0, 5).map((crypto, index) => (
-                  <motion.div
-                    key={crypto.id || crypto.symbol}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-xs font-bold">{crypto.symbol}</span>
-                      </div>
-                      <div>
-                        <p className="font-medium">{crypto.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          ₹{crypto.price?.toLocaleString('en-IN', { maximumFractionDigits: 2 }) || crypto.price?.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className={`text-sm font-medium flex items-center gap-1 ${
-                      (crypto.changePercent24h || crypto.change) >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {(crypto.changePercent24h || crypto.change) >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                      {(crypto.changePercent24h || crypto.change) >= 0 ? '+' : ''}{(crypto.changePercent24h || crypto.change)?.toFixed(2)}%
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Forex Rates */}
-      {displayData && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-        >
-          <Card glass className="hover:shadow-2xl transition-all duration-300">
-            <CardHeader>
-              <CardTitle>Forex Rates</CardTitle>
-              <CardDescription>Current exchange rates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                  <div>
-                    <p className="font-medium">USD/INR</p>
-                    <p className="text-sm text-muted-foreground">US Dollar</p>
-                  </div>
-                  <div className="text-2xl font-bold">₹{(displayData.data?.forex?.usdInr || 83.25).toFixed(2)}</div>
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                  <div>
-                    <p className="font-medium">EUR/INR</p>
-                    <p className="text-sm text-muted-foreground">Euro</p>
-                  </div>
-                  <div className="text-2xl font-bold">₹{(displayData.data?.forex?.eurInr || 90.50).toFixed(2)}</div>
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                  <div>
-                    <p className="font-medium">GBP/INR</p>
-                    <p className="text-sm text-muted-foreground">British Pound</p>
-                  </div>
-                  <div className="text-2xl font-bold">₹{(displayData.data?.forex?.gbpInr || 92.50).toFixed(2)}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+      {/* CTA Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5 p-12 border border-primary/20 shadow-2xl"
+      >
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+        <div className="relative z-10 text-center max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Ready to Transform Your Financial Journey?
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8">
+            Join thousands of users who are taking control of their finances with FinConnect
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button 
+              size="lg" 
+              className="text-lg px-8"
+              onClick={() => navigate('/calculators')}
+            >
+              Start Calculating <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="text-lg px-8"
+              onClick={() => navigate('/portfolio')}
+            >
+              Track Portfolio <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </motion.section>
     </div>
   )
 }

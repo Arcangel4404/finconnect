@@ -6,11 +6,53 @@ import { Label } from '../components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { calcAPI } from '../api'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Calculator, PiggyBank, CreditCard, TrendingUp } from 'lucide-react'
+import { Calculator, PiggyBank, CreditCard, TrendingUp, Receipt } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const COLORS = ['hsl(var(--primary))', '#22c55e', '#ef4444', '#f59e0b']
 
+const calculatorOptions = [
+  {
+    id: 'pf',
+    name: 'Provident Fund',
+    icon: PiggyBank,
+    description: 'Calculate PF balance with yearly compounding',
+    color: 'from-blue-500/20 to-blue-600/10',
+    borderColor: 'border-blue-500/20',
+    gradient: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5'
+  },
+  {
+    id: 'tax',
+    name: 'Income Tax',
+    icon: Receipt,
+    description: 'Calculate tax for old or new regime',
+    color: 'from-green-500/20 to-green-600/10',
+    borderColor: 'border-green-500/20',
+    gradient: 'bg-gradient-to-br from-green-500/10 to-green-600/5'
+  },
+  {
+    id: 'emi',
+    name: 'EMI',
+    icon: CreditCard,
+    description: 'Calculate loan EMI and amortization',
+    color: 'from-purple-500/20 to-purple-600/10',
+    borderColor: 'border-purple-500/20',
+    gradient: 'bg-gradient-to-br from-purple-500/10 to-purple-600/5'
+  },
+  {
+    id: 'sip',
+    name: 'SIP',
+    icon: TrendingUp,
+    description: 'Calculate SIP returns and future value',
+    color: 'from-orange-500/20 to-orange-600/10',
+    borderColor: 'border-orange-500/20',
+    gradient: 'bg-gradient-to-br from-orange-500/10 to-orange-600/5'
+  }
+]
+
 export function CalculatorsPage() {
+  const [activeTab, setActiveTab] = useState('pf')
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="space-y-2">
@@ -20,7 +62,50 @@ export function CalculatorsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="pf" className="w-full">
+      {/* Calculator Selection Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+      >
+        {calculatorOptions.map((calc, index) => {
+          const Icon = calc.icon
+          return (
+            <motion.div
+              key={calc.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+            >
+              <Card
+                glass
+                className={`hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] border ${calc.borderColor} ${
+                  activeTab === calc.id ? 'ring-2 ring-primary shadow-xl' : ''
+                } group`}
+                onClick={() => setActiveTab(calc.id)}
+              >
+                <CardHeader>
+                  <div className={`h-12 w-12 rounded-lg ${calc.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-lg">{calc.name}</CardTitle>
+                  <CardDescription className="text-sm line-clamp-2">
+                    {calc.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className={`w-full h-1 rounded-full transition-all ${
+                    activeTab === calc.id ? 'bg-primary' : 'bg-muted group-hover:bg-primary/50'
+                  }`} />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )
+        })}
+      </motion.div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pf">PF</TabsTrigger>
           <TabsTrigger value="tax">Tax</TabsTrigger>

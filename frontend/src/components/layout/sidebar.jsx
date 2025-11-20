@@ -14,7 +14,7 @@ import {
 import { useState } from 'react'
 import { cn } from '../../lib/utils'
 
-const menuItems = [
+export const menuItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/calculators', label: 'Calculators', icon: Calculator },
   { path: '/bank-lookup', label: 'Bank Lookup', icon: Building2 },
@@ -25,78 +25,117 @@ const menuItems = [
   { path: '/recommendations', label: 'Recommendations', icon: Lightbulb },
 ]
 
-export function Sidebar({ isOpen, setIsOpen }) {
+export function TopNavigation() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <>
       {/* Mobile overlay */}
-      {isOpen && (
+      {mobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={() => setMobileMenuOpen(false)}
         />
       )}
-      
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-50 h-full w-64 bg-card border-r border-border transition-transform duration-300 ease-in-out lg:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo and close button */}
-          <div className="flex h-16 items-center justify-between px-6 border-b border-border">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-primary-foreground" />
+
+      {/* Top Navigation Bar */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo and Copyright */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <span className="text-xl font-bold">FinConnect</span>
               </div>
-              <span className="text-xl font-bold">FinConnect</span>
+              <p className="hidden lg:block text-xs text-muted-foreground">
+                © 2025 FinConnect
+              </p>
             </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-1">
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.path === '/'}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 group",
+                        isActive
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      )
+                    }
+                  >
+                    <Icon className={cn(
+                      "h-4 w-4 transition-transform duration-200",
+                      "group-hover:scale-110"
+                    )} />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </NavLink>
+                )
+              })}
+            </nav>
+
+            {/* Mobile menu button */}
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 hover:bg-accent rounded-md transition-colors"
             >
-              <X className="h-5 w-5" />
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
-            {menuItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  end={item.path === '/'}
-                  onClick={() => setIsOpen(false)}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    )
-                  }
-                >
-                  <Icon className={cn(
-                    "h-5 w-5 transition-transform duration-200",
-                    "group-hover:scale-110"
-                  )} />
-                  <span className="font-medium">{item.label}</span>
-                </NavLink>
-              )
-            })}
-          </nav>
-
-          {/* Footer */}
-          <div className="p-4 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center">
-              © 2024 FinConnect
-            </p>
-          </div>
+          {/* Mobile Navigation Menu */}
+          {mobileMenuOpen && (
+            <nav className="lg:hidden py-4 border-t border-border">
+              <div className="flex flex-col space-y-1">
+                {menuItems.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      end={item.path === '/'}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group",
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-md"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        )
+                      }
+                    >
+                      <Icon className={cn(
+                        "h-5 w-5 transition-transform duration-200",
+                        "group-hover:scale-110"
+                      )} />
+                      <span className="font-medium">{item.label}</span>
+                    </NavLink>
+                  )
+                })}
+                {/* Mobile copyright */}
+                <div className="px-4 pt-4 border-t border-border mt-2">
+                  <p className="text-xs text-muted-foreground text-center">
+                    © 2025 FinConnect
+                  </p>
+                </div>
+              </div>
+            </nav>
+          )}
         </div>
-      </aside>
+      </header>
     </>
   )
 }
