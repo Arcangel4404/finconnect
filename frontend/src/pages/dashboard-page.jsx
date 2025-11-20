@@ -46,14 +46,6 @@ const features = [
     link: '/schemes'
   },
   {
-    icon: TrendingUp,
-    title: 'Mutual Funds',
-    description: 'Track NAV, analyze fund performance, and explore SEBI-registered mutual fund schemes.',
-    color: 'from-orange-500/20 to-orange-600/10',
-    borderColor: 'border-orange-500/20',
-    link: '/mutual-funds'
-  },
-  {
     icon: PieChart,
     title: 'Portfolio Tracker',
     description: 'Monitor your investments across stocks, mutual funds, FDs, and more. Track returns in real-time.',
@@ -94,7 +86,8 @@ const newsItems = [
     description: 'Understanding the latest tax regime updates and how they impact your savings. Compare old vs new regime benefits.',
     category: 'Tax',
     date: '2 hours ago',
-    image: '📊'
+    image: '📊',
+    url: 'https://www.livemint.com/money/personal-finance'
   },
   {
     id: 2,
@@ -102,7 +95,8 @@ const newsItems = [
     description: 'Learn about the latest FD interest rates and how to maximize your returns with our FD calculator.',
     category: 'Banking',
     date: '5 hours ago',
-    image: '🏦'
+    image: '🏦',
+    url: 'https://economictimes.indiatimes.com/wealth/banking'
   },
   {
     id: 3,
@@ -110,7 +104,8 @@ const newsItems = [
     description: 'Expert recommendations on the best mutual fund schemes based on risk profile and investment goals.',
     category: 'Investments',
     date: '1 day ago',
-    image: '📈'
+    image: '📈',
+    url: 'https://www.moneycontrol.com/mutual-funds'
   },
   {
     id: 4,
@@ -118,7 +113,8 @@ const newsItems = [
     description: 'Check your eligibility for the latest government scholarship programs using our eligibility checker.',
     category: 'Schemes',
     date: '2 days ago',
-    image: '🎓'
+    image: '🎓',
+    url: 'https://www.business-standard.com/finance'
   },
   {
     id: 5,
@@ -126,7 +122,8 @@ const newsItems = [
     description: 'Essential tips and tools to identify and prevent financial fraud. Use our fraud detection system.',
     category: 'Security',
     date: '3 days ago',
-    image: '🔒'
+    image: '🔒',
+    url: 'https://www.financialexpress.com/money'
   },
   {
     id: 6,
@@ -134,7 +131,8 @@ const newsItems = [
     description: 'Compare SIP and lump sum investments to make informed decisions about your investment strategy.',
     category: 'Investments',
     date: '4 days ago',
-    image: '💰'
+    image: '💰',
+    url: 'https://www.zeebiz.com/personal-finance'
   }
 ]
 
@@ -384,6 +382,7 @@ export function DashboardPage() {
               <Card 
                 glass 
                 className="hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] border-border/50 h-full group overflow-hidden"
+                onClick={() => window.open(news.url, '_blank', 'noopener,noreferrer')}
               >
                 <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                   <div className="text-6xl">{news.image}</div>

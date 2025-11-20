@@ -6,7 +6,6 @@ import { PageTransition } from './components/layout/page-transition'
 import { DashboardPage } from './pages/dashboard-page'
 import { IFSCLookupPage } from './pages/ifsc-lookup-page'
 import { SchemesPage } from './pages/schemes-page'
-import { MutualFundPage } from './pages/mutual-fund-page'
 import { PortfolioTrackerPage } from './pages/portfolio-tracker-page'
 import { CalculatorsPage } from './pages/calculators-page'
 import { FraudDetectionPage } from './pages/fraud-detection-page'
@@ -36,11 +35,6 @@ function AppRoutes() {
         <Route path="/schemes" element={
           <PageTransition>
             <SchemesPage />
-          </PageTransition>
-        } />
-        <Route path="/mutual-funds" element={
-          <PageTransition>
-            <MutualFundPage />
           </PageTransition>
         } />
         <Route path="/portfolio" element={

@@ -39,6 +39,34 @@ exports.checkEligibility = (req, res) => {
       case 'scholarship':
         schemeInfo = governmentSchemes.checkScholarships(userData);
         break;
+      case 'pmkisan':
+      case 'pm-kisan':
+        schemeInfo = governmentSchemes.checkPMKISAN(userData);
+        break;
+      case 'ayushman':
+      case 'pm-jay':
+      case 'ayushman-bharat':
+        schemeInfo = governmentSchemes.checkAyushmanBharat(userData);
+        break;
+      case 'ujjwala':
+      case 'pm-ujjwala':
+        schemeInfo = governmentSchemes.checkUjjwala(userData);
+        break;
+      case 'standup':
+      case 'stand-up-india':
+        schemeInfo = governmentSchemes.checkStandUpIndia(userData);
+        break;
+      case 'mudra':
+        schemeInfo = governmentSchemes.checkMUDRA(userData);
+        break;
+      case 'matruvandana':
+      case 'pmmvy':
+        schemeInfo = governmentSchemes.checkMatruVandana(userData);
+        break;
+      case 'pmkmy':
+      case 'pm-kmy':
+        schemeInfo = governmentSchemes.checkPMKMY(userData);
+        break;
       case 'all':
         schemeInfo = {
           schemes: governmentSchemes.checkAllSchemes(userData),
@@ -49,7 +77,7 @@ exports.checkEligibility = (req, res) => {
       default:
         return res.status(400).json({
           success: false,
-          error: `Unknown scheme: ${scheme}. Supported schemes: pmay, pmjjby, pmsby, apy, scholarships, all`
+          error: `Unknown scheme: ${scheme}. Supported schemes: pmay, pmjjby, pmsby, apy, scholarships, pmkisan, ayushman, ujjwala, standup, mudra, matruvandana, pmkmy, all`
         });
     }
     

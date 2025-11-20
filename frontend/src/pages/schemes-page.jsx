@@ -4,7 +4,7 @@ import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
 import { Label } from '../components/ui/label'
 import { Badge } from '../components/ui/badge'
-import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
+import { CheckCircle2, XCircle, AlertCircle, ExternalLink } from 'lucide-react'
 import { schemesAPI } from '../api'
 
 export function SchemesPage() {
@@ -130,6 +130,13 @@ export function SchemesPage() {
                   <option value="pmsby">PMSBY (Accidental Insurance)</option>
                   <option value="apy">APY (Pension)</option>
                   <option value="scholarships">Scholarships</option>
+                  <option value="pmkisan">PM-KISAN (Farmer Income Support)</option>
+                  <option value="ayushman">Ayushman Bharat / PM-JAY (Health Insurance)</option>
+                  <option value="ujjwala">PM Ujjwala Yojana (LPG Connection)</option>
+                  <option value="standup">Stand Up India (Entrepreneurship Loan)</option>
+                  <option value="mudra">MUDRA (Micro Enterprise Loan)</option>
+                  <option value="matruvandana">PM Matru Vandana Yojana (Maternity Benefit)</option>
+                  <option value="pmkmy">PM-KMY (Farmer Pension)</option>
                 </select>
               </div>
 
@@ -312,6 +319,61 @@ export function SchemesPage() {
                   <div>
                     <Label className="text-muted-foreground">Subsidy</Label>
                     <p className="text-lg font-semibold">₹{scheme.subsidy.toLocaleString('en-IN')}</p>
+                  </div>
+                )}
+                {scheme.amount && (
+                  <div>
+                    <Label className="text-muted-foreground">Benefit Amount</Label>
+                    <p className="text-lg font-semibold">₹{scheme.amount.toLocaleString('en-IN')}</p>
+                  </div>
+                )}
+                {scheme.loanAmount && (
+                  <div>
+                    <Label className="text-muted-foreground">Loan Amount (up to)</Label>
+                    <p className="text-lg font-semibold">₹{scheme.loanAmount.toLocaleString('en-IN')}</p>
+                  </div>
+                )}
+                {scheme.pensionRange && (
+                  <div>
+                    <Label className="text-muted-foreground">Pension Range</Label>
+                    <p className="text-lg font-semibold">₹{scheme.pensionRange.min.toLocaleString('en-IN')} - ₹{scheme.pensionRange.max.toLocaleString('en-IN')}/month</p>
+                  </div>
+                )}
+                {scheme.loanCategories && (
+                  <div>
+                    <Label className="text-muted-foreground">Loan Categories</Label>
+                    <div className="space-y-2 mt-2">
+                      {Object.entries(scheme.loanCategories).map(([key, category]) => (
+                        <div key={key} className="p-2 rounded bg-muted/50">
+                          <p className="font-medium">{category.name}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {scheme.contribution && (
+                  <div className="p-3 rounded-lg bg-muted/50">
+                    <Label className="text-muted-foreground">Contribution</Label>
+                    <p className="text-sm mt-1">{scheme.contribution}</p>
+                  </div>
+                )}
+                {scheme.governmentContribution && (
+                  <div className="p-3 rounded-lg bg-muted/50">
+                    <Label className="text-muted-foreground">Government Contribution</Label>
+                    <p className="text-sm mt-1">{scheme.governmentContribution}</p>
+                  </div>
+                )}
+                {scheme.eligible && scheme.applicationLink && (
+                  <div className="pt-4 border-t border-border">
+                    <Button
+                      onClick={() => window.open(scheme.applicationLink, '_blank', 'noopener,noreferrer')}
+                      className="w-full"
+                    >
+                      Apply Now <ExternalLink className="ml-2 h-4 w-4" />
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                      Click to visit official government portal
+                    </p>
                   </div>
                 )}
                 {scheme.scholarships && scheme.scholarships.length > 0 && (

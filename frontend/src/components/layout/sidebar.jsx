@@ -19,7 +19,6 @@ export const menuItems = [
   { path: '/calculators', label: 'Calculators', icon: Calculator },
   { path: '/bank-lookup', label: 'Bank Lookup', icon: Building2 },
   { path: '/schemes', label: 'Government Schemes', icon: FileText },
-  { path: '/mutual-funds', label: 'Mutual Funds', icon: TrendingUp },
   { path: '/portfolio', label: 'Portfolio Tracker', icon: PieChart },
   { path: '/fraud-detection', label: 'Fraud Detection', icon: Shield },
   { path: '/recommendations', label: 'Recommendations', icon: Lightbulb },
@@ -42,17 +41,12 @@ export function TopNavigation() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            {/* Logo and Copyright */}
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-primary-foreground" />
-                </div>
-                <span className="text-xl font-bold">FinConnect</span>
+            {/* Logo */}
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-primary-foreground" />
               </div>
-              <p className="hidden lg:block text-xs text-muted-foreground">
-                © 2025 FinConnect
-              </p>
+              <span className="text-xl font-bold">FinConnect</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -125,12 +119,6 @@ export function TopNavigation() {
                     </NavLink>
                   )
                 })}
-                {/* Mobile copyright */}
-                <div className="px-4 pt-4 border-t border-border mt-2">
-                  <p className="text-xs text-muted-foreground text-center">
-                    © 2025 FinConnect
-                  </p>
-                </div>
               </div>
             </nav>
           )}
