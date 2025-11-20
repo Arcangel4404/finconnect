@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { getNewsItems } from '../data/news'
 
 const features = [
   {
@@ -79,62 +80,8 @@ const features = [
   }
 ]
 
-const newsItems = [
-  {
-    id: 1,
-    title: 'New Income Tax Regime Changes Effective from FY 2025',
-    description: 'Understanding the latest tax regime updates and how they impact your savings. Compare old vs new regime benefits.',
-    category: 'Tax',
-    date: '2 hours ago',
-    image: '📊',
-    url: 'https://www.livemint.com/money/personal-finance'
-  },
-  {
-    id: 2,
-    title: 'RBI Introduces New Rules for Fixed Deposits',
-    description: 'Learn about the latest FD interest rates and how to maximize your returns with our FD calculator.',
-    category: 'Banking',
-    date: '5 hours ago',
-    image: '🏦',
-    url: 'https://economictimes.indiatimes.com/wealth/banking'
-  },
-  {
-    id: 3,
-    title: 'Top 5 Mutual Funds to Consider in 2025',
-    description: 'Expert recommendations on the best mutual fund schemes based on risk profile and investment goals.',
-    category: 'Investments',
-    date: '1 day ago',
-    image: '📈',
-    url: 'https://www.moneycontrol.com/mutual-funds'
-  },
-  {
-    id: 4,
-    title: 'Government Launches New Scholarship Schemes',
-    description: 'Check your eligibility for the latest government scholarship programs using our eligibility checker.',
-    category: 'Schemes',
-    date: '2 days ago',
-    image: '🎓',
-    url: 'https://www.business-standard.com/finance'
-  },
-  {
-    id: 5,
-    title: 'How to Protect Yourself from Financial Fraud',
-    description: 'Essential tips and tools to identify and prevent financial fraud. Use our fraud detection system.',
-    category: 'Security',
-    date: '3 days ago',
-    image: '🔒',
-    url: 'https://www.financialexpress.com/money'
-  },
-  {
-    id: 6,
-    title: 'SIP vs Lump Sum: Which is Better?',
-    description: 'Compare SIP and lump sum investments to make informed decisions about your investment strategy.',
-    category: 'Investments',
-    date: '4 days ago',
-    image: '💰',
-    url: 'https://www.zeebiz.com/personal-finance'
-  }
-]
+// Get news items from data file
+const newsItems = getNewsItems()
 
 const benefits = [
   'Real-time financial calculations',
@@ -382,7 +329,7 @@ export function DashboardPage() {
               <Card 
                 glass 
                 className="hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] border-border/50 h-full group overflow-hidden"
-                onClick={() => window.open(news.url, '_blank', 'noopener,noreferrer')}
+                onClick={() => navigate(`/news/${news.id}`)}
               >
                 <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                   <div className="text-6xl">{news.image}</div>

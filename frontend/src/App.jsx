@@ -10,6 +10,7 @@ import { PortfolioTrackerPage } from './pages/portfolio-tracker-page'
 import { CalculatorsPage } from './pages/calculators-page'
 import { FraudDetectionPage } from './pages/fraud-detection-page'
 import { RecommendationsPage } from './pages/recommendations-page'
+import { NewsDetailPage } from './pages/news-detail-page'
 
 function AppRoutes() {
   const location = useLocation()
@@ -50,6 +51,11 @@ function AppRoutes() {
         <Route path="/recommendations" element={
           <PageTransition>
             <RecommendationsPage />
+          </PageTransition>
+        } />
+        <Route path="/news/:id" element={
+          <PageTransition>
+            <NewsDetailPage />
           </PageTransition>
         } />
       </Routes>
